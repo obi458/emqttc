@@ -48,8 +48,8 @@
          received/2]).
 
 -record(proto_state, {
-        socket                  :: inet:socket(),
-        socket_name             :: list() | binary(),
+        socket                  :: inet:socket() | undefined,
+        socket_name             :: list() | binary() | undefined,
         proto_ver  = 4          :: mqtt_vsn(),
         proto_name = <<"MQTT">> :: binary(),
         client_id               :: binary(),

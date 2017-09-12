@@ -62,16 +62,18 @@ new() ->
 %% @doc Create a reconnector with min_interval, max_interval seconds and max retries.
 %% @end
 %%------------------------------------------------------------------------------
--spec new(MinInterval) -> reconnector() when 
-      MinInterval  :: non_neg_integer() | {non_neg_integer(), non_neg_integer()}.
-new(MinInterval) when is_integer(MinInterval), MinInterval =< ?MAX_INTERVAL ->
+%-spec new(MinInterval) -> reconnector() when
+%      MinInterval  :: integer() | {integer(), integer()}.
+new(MinInterval) when is_integer(MinInterval), MinInterval > 0, MinInterval =< ?MAX_INTERVAL ->
     new({MinInterval, ?MAX_INTERVAL});
 
-new({MinInterval, MaxInterval}) when is_integer(MinInterval), is_integer(MaxInterval), MinInterval =< MaxInterval ->
+new({MinInterval, MaxInterval}) when is_integer(MinInterval), is_integer(MaxInterval),
+  MinInterval > 0, MaxInterval > 0,
+  MinInterval =< MaxInterval ->
     new({MinInterval, MaxInterval, infinity});
 new({_MinInterval, _MaxInterval}) ->
     new({?MIN_INTERVAL, ?MAX_INTERVAL, infinity});
-new({MinInterval, MaxInterval, MaxRetries}) when is_integer(MinInterval),
+new({MinInterval, MaxInterval, MaxRetries}) when is_integer(MinInterval), MinInterval > 0, MaxInterval > 0,
                                     is_integer(MaxInterval), ?IS_MAX_RETRIES(MaxRetries) ->
     #reconnector{min_interval = MinInterval, 
                  interval     = MinInterval, 

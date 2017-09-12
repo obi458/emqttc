@@ -94,22 +94,22 @@
                 name                :: atom(),
                 host = "localhost"  :: inet:ip_address() | string(),
                 port = 1883         :: inet:port_number(),
-                socket              :: inet:socket(),
-                receiver            :: pid(),
+                socket              :: inet:socket() | undefined,
+                receiver            :: pid() | undefined,
                 proto_state         :: emqttc_protocol:proto_state(),
                 subscribers = []    :: list(),
                 pubsub_map  = #{}   :: map(),
                 ping_reqs   = []    :: list(),
                 pending_pubsub = [] :: list(),
                 inflight_reqs = #{} :: map(),
-                inflight_msgid      :: pos_integer(),
+                inflight_msgid      :: pos_integer() | undefined,
                 auto_resub = false  :: boolean(),
                 keepalive           :: emqttc_keepalive:keepalive() | undefined,
                 keepalive_after     :: non_neg_integer(),
                 connack_timeout     :: pos_integer(),
                 puback_timeout      :: pos_integer(),
                 suback_timeout      :: pos_integer(),
-                connack_tref        :: reference(),
+                connack_tref        :: reference() | undefined,
                 transport = tcp     :: tcp | ssl,
                 reconnector         :: emqttc_reconnector:reconnector() | undefined,
                 tcp_opts            :: [gen_tcp:connect_option()],
@@ -281,7 +281,7 @@ subscribe(Client, [{_Topic, _Qos} | _] = Topics) ->
 sync_subscribe(Client, Topic) when is_binary(Topic) ->
     sync_subscribe(Client, {Topic, ?QOS_0}); 
 sync_subscribe(Client, {Topic, Qos}) when is_binary(Topic), (?IS_QOS(Qos) orelse is_atom(Qos)) ->
-    case sync_subscribe(Client, [{Topic, qos_opt(Qos)}]) of
+    case sync_send_subscribe(Client, [{Topic, qos_opt(Qos)}]) of
         {ok, [GrantedQos]} ->
             {ok, GrantedQos};
         {error, Error} ->

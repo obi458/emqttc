@@ -57,7 +57,7 @@ type2([_H |T]) ->
 %% @doc Match Topic name with filter.
 %% @end
 %%------------------------------------------------------------------------------
--spec match(binary(), binary()) -> boolean().
+-spec match(binary() | list(), binary() | list()) -> boolean().
 match(Name, Filter) when is_binary(Name) and is_binary(Filter) ->
     match(words(Name), words(Filter));
 match([], []) ->

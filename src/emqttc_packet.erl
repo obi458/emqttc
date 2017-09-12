@@ -138,13 +138,11 @@ dump_variable(#mqtt_packet_unsuback{packet_id = PacketId}) ->
     io_lib:format("PacketId=~p", [PacketId]);
 
 dump_variable(PacketId) when is_integer(PacketId) ->
-    io_lib:format("PacketId=~p", [PacketId]);
-
-dump_variable(undefined) -> undefined.
+    io_lib:format("PacketId=~p", [PacketId]).
 
 dump_password(undefined) -> undefined;
 dump_password(_)         -> <<"******">>.
 
 i(true)  -> 1;
-i(false) -> 0;
-i(I) when is_integer(I) -> I.
+i(false) -> 0.%;
+%i(I) when is_integer(I) -> I.

@@ -139,7 +139,8 @@ close(#ssl_socket{ssl = SslSocket}) ->
 %%------------------------------------------------------------------------------
 -spec stop(Receiver :: pid()) -> ok.
 stop(Receiver) ->
-    Receiver ! stop.
+    Receiver ! stop,
+    ok.
 
 %%------------------------------------------------------------------------------
 %% @doc Set socket options.
@@ -242,8 +243,8 @@ parse_received_bytes(ClientPid, Data, ParseState) ->
 connection_lost(ClientPid, Reason) ->
     gen_fsm:send_all_state_event(ClientPid, {connection_lost, Reason}).
 
-maybe_ntoab(Addr) when is_tuple(Addr) -> ntoab(Addr);
-maybe_ntoab(Host)                     -> Host.
+maybe_ntoab(Addr) when is_tuple(Addr) -> ntoab(Addr).
+%maybe_ntoab(Host)                     -> Host.
 
 ntoa({0,0,0,0,0,16#ffff,AB,CD}) ->
     inet_parse:ntoa({AB bsr 8, AB rem 256, CD bsr 8, CD rem 256});

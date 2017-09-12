@@ -234,7 +234,7 @@
     retain = false  :: boolean(),
     dup    = false  :: boolean(),
     msgid           :: mqtt_packet_id(),
-    topic           :: binary(),
-    payload         :: binary()}).
+    topic  = <<>>   :: binary(),
+    payload= <<>>   :: binary()}).
 
 -type mqtt_message() :: #mqtt_message{}.
