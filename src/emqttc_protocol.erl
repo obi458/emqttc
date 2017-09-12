@@ -63,7 +63,7 @@
         subscriptions = #{}     :: map(),
         awaiting_ack  = #{}     :: map(),
         awaiting_rel  = #{}     :: map(),
-        awaiting_comp = #{}     :: map()
+        awaiting_comp = #{}     :: map()}).
 
 -type proto_state() :: #proto_state{}.
 
