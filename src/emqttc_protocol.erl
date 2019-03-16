@@ -28,6 +28,7 @@
 -author("Feng Lee <feng@emqtt.io>").
 
 -include("emqttc_packet.hrl").
+-include("logger.hrl").
 
 -compile(nowarn_deprecated_function).
 
@@ -219,7 +220,7 @@ subscribe(Topics, State = #proto_state{packet_id = PacketId,
     Resubs = [Topic || {Name, _Qos} = Topic <- Topics, maps:is_key(Name, SubMap)], 
     case Resubs of
         [] -> ok;
-        _  -> lager:warning("[~s] resubscribe ~p", [logtag(State), Resubs])
+        _  -> ?WARN("[~s] resubscribe ~p", [logtag(State), Resubs])
     end,
     SubMap1 = lists:foldl(fun({Name, Qos}, Acc) -> maps:put(Name, Qos, Acc) end, SubMap, Topics),
     %% send packet
@@ -229,7 +230,7 @@ subscribe(Topics, State = #proto_state{packet_id = PacketId,
 unsubscribe(Topics, State = #proto_state{subscriptions = SubMap, packet_id = PacketId}) ->
     case Topics -- maps:keys(SubMap) of
         [] -> ok;
-        BadUnsubs -> lager:warning("[~s] should not unsubscribe ~p", [logtag(State), BadUnsubs])
+        BadUnsubs -> ?WARN("[~s] should not unsubscribe ~p", [logtag(State), BadUnsubs])
     end,
     %% unsubscribe from topic tree
     SubMap1 = lists:foldl(fun(Topic, Acc) -> maps:remove(Topic, Acc) end, SubMap, Topics),
@@ -261,7 +262,7 @@ received({'PUBLISH', Packet = ?PUBLISH_PACKET(?QOS_2, _Topic, PacketId, _Payload
 received({'PUBACK', PacketId}, State = #proto_state{awaiting_ack = AwaitingAck}) ->
     case maps:is_key(PacketId, AwaitingAck) of
         true -> ok;
-        false -> lager:warning("[~s] PUBACK PacketId '~p' not found!", [logtag(State), PacketId])
+        false -> ?WARN("[~s] PUBACK PacketId '~p' not found!", [logtag(State), PacketId])
     end,
     {ok, State#proto_state{awaiting_ack = maps:remove(PacketId, AwaitingAck)}};
 
@@ -269,7 +270,7 @@ received({'PUBREC', PacketId}, State = #proto_state{awaiting_ack = AwaitingAck,
                                                     awaiting_comp = AwaitingComp}) ->
     case maps:is_key(PacketId, AwaitingAck) of
         true -> ok;
-        false -> lager:warning("[~s] PUBREC PacketId '~p' not found!", [logtag(State), PacketId])
+        false -> ?WARN("[~s] PUBREC PacketId '~p' not found!", [logtag(State), PacketId])
     end,
     pubrel(PacketId, State),
     {ok, State#proto_state{awaiting_ack   = maps:remove(PacketId, AwaitingAck), 
@@ -280,14 +281,14 @@ received({'PUBREL', PacketId}, State = #proto_state{awaiting_rel = AwaitingRel})
         {ok, Publish} -> 
             {ok, Publish, State#proto_state{awaiting_rel = maps:remove(PacketId, AwaitingRel)}}; 
         error -> 
-            lager:warning("[~s] PUBREL PacketId '~p' not found!", [logtag(State), PacketId]),
+            ?WARN("[~s] PUBREL PacketId '~p' not found!", [logtag(State), PacketId]),
             {ok, State}
     end;
 
 received({'PUBCOMP', PacketId}, State = #proto_state{awaiting_comp = AwaitingComp}) ->
     case maps:is_key(PacketId, AwaitingComp) of
         true -> ok;
-        false -> lager:warning("[~s] PUBREC PacketId '~p' not exist", [logtag(State), PacketId])
+        false -> ?WARN("[~s] PUBREC PacketId '~p' not exist", [logtag(State), PacketId])
     end,
     {ok, State#proto_state{ awaiting_comp  = maps:remove(PacketId, AwaitingComp)}};
 
@@ -312,9 +313,9 @@ received({'UNSUBACK', _PacketId}, State) ->
 %%------------------------------------------------------------------------------
 send(Packet, State = #proto_state{socket = Socket}) ->
     LogTag = logtag(State),
-    lager:debug("[~s] SENT: ~s", [LogTag, emqttc_packet:dump(Packet)]),
+    ?DEBUG("[~s] SENT: ~s", [LogTag, emqttc_packet:dump(Packet)]),
     Data = emqttc_serialiser:serialise(Packet),
-    lager:debug("[~s] SENT: ~p", [LogTag, Data]),
+    ?DEBUG("[~s] SENT: ~p", [LogTag, Data]),
     emqttc_socket:send(Socket, Data),
     {ok, State}.
 
